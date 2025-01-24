@@ -4,12 +4,15 @@ interface ViewportInfo {
   keyboardHeight: number;
 }
 
-interface StickyContainerProps {
+interface KeyboardAvoidingContainerProps {
   body: React.ReactNode;
   footer: React.ReactNode;
 }
 
-const StickyContainer: React.FC<StickyContainerProps> = ({ body, footer }) => {
+const KeyboardAvoidingContainer: React.FC<KeyboardAvoidingContainerProps> = ({
+  body,
+  footer,
+}) => {
   const [viewport, setViewport] = useState<ViewportInfo>({
     visualHeight: window.innerHeight,
     keyboardHeight: 0,
@@ -199,4 +202,4 @@ const StickyContainer: React.FC<StickyContainerProps> = ({ body, footer }) => {
   );
 };
 
-export default StickyContainer;
+export default KeyboardAvoidingContainer;
