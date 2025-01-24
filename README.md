@@ -111,6 +111,10 @@ function ChatApp() {
   );
 }
 ```
+Demo:
+
+https://github.com/user-attachments/assets/60255785-0c33-4843-bba5-18612113b8f1
+
 
 ## Contributing
 
