@@ -2,6 +2,8 @@
 
 A React component that handles mobile keyboard interactions gracefully, ensuring proper viewport adjustments and scroll behavior when the keyboard appears.
 
+https://www.npmjs.com/package/react-keyboard-avoiding-container
+
 ## Features
 
 - 📱 Automatic keyboard height detection
