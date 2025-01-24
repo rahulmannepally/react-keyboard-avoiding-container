@@ -2,7 +2,24 @@
   "name": "react-keyboard-avoiding-container",
   "private": false,
   "version": "0.0.1",
-  "description": "A simple template for a custom React component library",
+  "description": "A React component that provides smooth keyboard interactions for mobile web apps, handling viewport adjustments, scroll behavior, and input field focus with a sticky footer layout",
+  "keywords": [
+    "react",
+    "mobile",
+    "keyboard",
+    "viewport",
+    "ios",
+    "android",
+    "input",
+    "form",
+    "sticky",
+    "container",
+    "scroll",
+    "mobile-web",
+    "keyboard-avoiding",
+    "typescript",
+    "react-component"
+  ],
   "scripts": {
     "rollup": "rollup -c",
     "build": "rollup -c",
@@ -11,8 +28,22 @@
     "rebuild": "npm run clean && npm run build",
     "prepare": "npm run build"
   },
-  "author": "Rahul Mannepally",
+  "author": {
+    "name": "Rahul Mannepally",
+    "url": "https://github.com/rahulmannepally"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rahulmannepally/react-keyboard-avoiding-container.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rahulmannepally/react-keyboard-avoiding-container/issues"
+  },
+  "homepage": "https://github.com/rahulmannepally/react-keyboard-avoiding-container#readme",
   "license": "ISC",
+  "engines": {
+    "node": ">=14"
+  },
   "peerDependencies": {
     "react": ">=18.0.0 <19.0.0",
     "react-dom": ">=18.0.0 <19.0.0"
@@ -33,5 +64,9 @@
   "files": [
     "dist"
   ],
-  "types": "dist/index.d.ts"
+  "types": "dist/index.d.ts",
+  "publishConfig": {
+    "access": "public"
+  },
+  "sideEffects": false
 }
