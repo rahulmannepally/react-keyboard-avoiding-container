@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+
 interface ViewportInfo {
   visualHeight: number;
   keyboardHeight: number;
@@ -7,38 +8,59 @@ interface ViewportInfo {
 interface KeyboardAvoidingContainerProps {
   body: React.ReactNode;
   footer: React.ReactNode;
+  transitionDuration?: number;
 }
 
 const KeyboardAvoidingContainer: React.FC<KeyboardAvoidingContainerProps> = ({
   body,
   footer,
+  transitionDuration = 280,
 }) => {
   const [viewport, setViewport] = useState<ViewportInfo>({
     visualHeight: window.innerHeight,
     keyboardHeight: 0,
   });
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
   const lastFocusedElementRef = useRef<HTMLElement | null>(null);
+  const resizeTimeoutRef = useRef<NodeJS.Timeout>();
+  const prevHeightRef = useRef<number>(window.innerHeight);
 
   const updateViewport = (immediate = false) => {
     const update = () => {
       const newVisualHeight =
         window.visualViewport?.height || window.innerHeight;
       const newKeyboardHeight = window.innerHeight - newVisualHeight;
+      const isKeyboardOpen = newKeyboardHeight > 50; // threshold to detect keyboard
 
-      window.scrollTo(0, 0);
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
+      if (newVisualHeight !== prevHeightRef.current) {
+        setIsTransitioning(true);
+
+        if (resizeTimeoutRef.current) {
+          clearTimeout(resizeTimeoutRef.current);
+        }
+
+        resizeTimeoutRef.current = setTimeout(() => {
+          setIsTransitioning(false);
+        }, transitionDuration);
+
+        prevHeightRef.current = newVisualHeight;
+      }
+
+      requestAnimationFrame(() => {
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      });
 
       setViewport({
         visualHeight: newVisualHeight,
         keyboardHeight: newKeyboardHeight,
       });
 
-      // Ensure focused element is visible after keyboard appears
-      if (lastFocusedElementRef.current && newKeyboardHeight > 0) {
+      if (lastFocusedElementRef.current && isKeyboardOpen) {
         handleFocusScroll(lastFocusedElementRef.current);
       }
     };
@@ -71,7 +93,6 @@ const KeyboardAvoidingContainer: React.FC<KeyboardAvoidingContainerProps> = ({
       });
     });
 
-    // Lock body
     const styles = {
       position: "fixed",
       width: "100%",
@@ -88,7 +109,6 @@ const KeyboardAvoidingContainer: React.FC<KeyboardAvoidingContainerProps> = ({
     Object.assign(document.body.style, styles);
     Object.assign(document.documentElement.style, styles);
 
-    // Allow scrolling within container
     if (containerRef.current) {
       containerRef.current.addEventListener("scroll", (e) =>
         e.stopPropagation()
@@ -99,8 +119,13 @@ const KeyboardAvoidingContainer: React.FC<KeyboardAvoidingContainerProps> = ({
     }
 
     const handleResize = () => updateViewport();
-    const handleOrientationChange = () =>
-      setTimeout(() => updateViewport(true), 100);
+    const handleOrientationChange = () => {
+      setIsTransitioning(true);
+      setTimeout(() => {
+        updateViewport(true);
+        setTimeout(() => setIsTransitioning(false), transitionDuration);
+      }, 100);
+    };
 
     window.visualViewport?.addEventListener("resize", handleResize);
     window.visualViewport?.addEventListener("scroll", handleResize);
@@ -109,6 +134,10 @@ const KeyboardAvoidingContainer: React.FC<KeyboardAvoidingContainerProps> = ({
     updateViewport(true);
 
     return () => {
+      if (resizeTimeoutRef.current) {
+        clearTimeout(resizeTimeoutRef.current);
+      }
+
       events.forEach((event) => {
         document.removeEventListener(event, preventDefault);
         document.body.removeEventListener(event, preventDefault);
@@ -131,12 +160,8 @@ const KeyboardAvoidingContainer: React.FC<KeyboardAvoidingContainerProps> = ({
     const containerRect = containerRef.current.getBoundingClientRect();
 
     const scrollTop =
-      elementRect.top - // Input's top position
-      containerRect.top + // Minus container's top position
-      containerRef.current.scrollTop -
-      60;
+      elementRect.top - containerRect.top + containerRef.current.scrollTop - 60;
 
-    // Use requestAnimationFrame for smoother scrolling
     requestAnimationFrame(() => {
       if (containerRef.current) {
         containerRef.current.scrollTo({
@@ -145,7 +170,6 @@ const KeyboardAvoidingContainer: React.FC<KeyboardAvoidingContainerProps> = ({
         });
       }
 
-      // Force viewport position
       window.scrollTo(0, 0);
       document.documentElement.scrollTop = 0;
       document.body.scrollTop = 0;
@@ -169,6 +193,22 @@ const KeyboardAvoidingContainer: React.FC<KeyboardAvoidingContainerProps> = ({
     }, 100);
   };
 
+  const containerStyle: React.CSSProperties = {
+    height: `${viewport.visualHeight}px`,
+    WebkitOverflowScrolling: "touch",
+    transition: isTransitioning
+      ? `height ${transitionDuration}ms cubic-bezier(0.4, 0, 0.2, 1)`
+      : "none",
+    willChange: isTransitioning ? "height" : "auto",
+  };
+
+  const bodyStyle: React.CSSProperties = {
+    transition: isTransitioning
+      ? `all ${transitionDuration}ms cubic-bezier(0.4, 0, 0.2, 1)`
+      : "none",
+    willChange: isTransitioning ? "min-height, padding" : "auto",
+  };
+
   return (
     <div
       className="fixed inset-0 w-full overflow-hidden"
@@ -180,12 +220,13 @@ const KeyboardAvoidingContainer: React.FC<KeyboardAvoidingContainerProps> = ({
       <div
         ref={containerRef}
         className="absolute inset-0 w-full overflow-auto overscroll-none"
-        style={{
-          height: `${viewport.visualHeight}px`,
-          WebkitOverflowScrolling: "touch",
-        }}
+        style={containerStyle}
       >
-        <div ref={bodyRef} className="flex flex-col min-h-full px-6 pt-6">
+        <div
+          ref={bodyRef}
+          className="flex flex-col min-h-full px-6 pt-6"
+          style={bodyStyle}
+        >
           <div
             className="flex-1 pb-10"
             onFocus={handleFocus}
@@ -193,7 +234,15 @@ const KeyboardAvoidingContainer: React.FC<KeyboardAvoidingContainerProps> = ({
           >
             {body}
           </div>
-          <div className="sticky bottom-0 left-0 right-0 w-full bg-white mt-auto pb-2">
+          <div
+            className="sticky bottom-0 left-0 right-0 w-full bg-white mt-auto pb-2"
+            style={{
+              transition: isTransitioning
+                ? `transform ${transitionDuration}ms cubic-bezier(0.4, 0, 0.2, 1)`
+                : "none",
+              willChange: isTransitioning ? "transform" : "auto",
+            }}
+          >
             {footer}
           </div>
         </div>
