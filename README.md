@@ -154,9 +154,11 @@ const LoginPage: React.FC = () => {
 
 export default LoginPage;
 ```
-Demo Video:
+Demo:
 
-https://github.com/user-attachments/assets/60255785-0c33-4843-bba5-18612113b8f1
+
+https://github.com/user-attachments/assets/bced1ff1-1140-4038-ba63-438c9784b9b5
+
 
 
 ## Contributing
