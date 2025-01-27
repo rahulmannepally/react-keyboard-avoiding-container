@@ -1,6 +1,6 @@
 # React Keyboard Avoiding Container
 
-A React component that handles mobile keyboard interactions gracefully, ensuring proper viewport adjustments and scroll behavior when the keyboard appears.
+A React component for web applications that handles mobile keyboard interactions gracefully, ensuring proper viewport adjustments and scroll behavior when the keyboard appears. Works fluently across modern browsers and devices.
 
 https://www.npmjs.com/package/react-keyboard-avoiding-container
 
@@ -111,7 +111,7 @@ function ChatApp() {
   );
 }
 ```
-Demo:
+Demo Video:
 
 https://github.com/user-attachments/assets/60255785-0c33-4843-bba5-18612113b8f1
 
